@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  # Бэкенд (Spring Boot)
+  app:
+    build: ./backend/sport-events-api
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3307/sport-events.db?useSSL=false&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=51ufumiz
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+
+  # MySQL
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: 51ufumiz
+      MYSQL_DATABASE: sport-events.db
+    ports:
+      - "3307:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  # Фронтенд (React)
+#  frontend:
+#    build: ../../frontend/my-app
+#    ports:
+#      - "80:80"
+#    depends_on:
+#      - app
+
+volumes:
+  mysql_data:
